@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 
@@ -172,6 +173,9 @@ export default function App() {
         onReset={resetSimulation}
         toastMessage={toastNotification}
       />
+
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
