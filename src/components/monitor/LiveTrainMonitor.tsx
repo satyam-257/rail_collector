@@ -186,18 +186,18 @@ export default function LiveTrainMonitor({ trains, onSelectTrain, onNavigateToDe
                   </td>
                   <td className="py-4 px-4 font-bold text-slate-800">{train.currentLocation}</td>
                   <td className="py-4 px-4 text-slate-600">{train.nextStation}</td>
-                  <td className="py-4 px-4 font-mono font-bold text-blue-700">{train.currentSpeed} km/h</td>
+                  <td className="py-4 px-4 font-mono font-bold text-blue-700">{Math.round(train.currentSpeed)} km/h</td>
                   <td className="py-4 px-4">
                     <span
                       className={`font-mono font-bold px-2.5 py-1 rounded-md ${
-                        train.delayMinutes === 0
+                        Math.round(train.delayMinutes) <= 0
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : train.delayMinutes > 30
+                          : Math.round(train.delayMinutes) > 30
                           ? 'bg-rose-50 text-rose-700 border border-rose-200'
                           : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}
                     >
-                      {train.delayMinutes === 0 ? 'On Time' : `+${train.delayMinutes} min`}
+                      {Math.round(train.delayMinutes) <= 0 ? 'On Time' : `+${Math.round(train.delayMinutes)} min`}
                     </span>
                   </td>
                   <td className="py-4 px-4 font-mono font-bold text-emerald-700 text-sm">

@@ -130,7 +130,7 @@ export default function EtaPredictionsView({
         <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200/80 flex items-start gap-3 text-xs text-blue-900">
           <HelpCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
           <div>
-            <strong className="font-bold">Dual Model ML Comparison:</strong> Both Random Forest (`eta_random_forest.pkl`, MAE 7.74m) and XGBoost (`eta_xgboost.json`, MAE 7.29m) are saved and evaluated during live batch predictions.
+            <strong className="font-bold">Dual Model ML Comparison:</strong> Both Random Forest (`eta_random_forest.pkl`, MAE 10.62m) and tuned XGBoost (`eta_xgboost.json`, MAE 10.37m) are evaluated during live batch predictions, delivering a 42.3% error reduction over baseline timetables.
           </div>
         </div>
       </div>

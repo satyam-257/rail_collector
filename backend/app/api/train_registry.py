@@ -113,11 +113,11 @@ class TrainRegistry:
             if train["speed"] > 0:
                 # Progress distance covered independently
                 dist_delta = (train["speed"] / 3600.0) * 15.0 # km in 15 seconds
-                train["distance_covered_km"] = min(train["total_distance_km"], train["distance_covered_km"] + dist_delta)
+                train["distance_covered_km"] = round(min(train["total_distance_km"], train["distance_covered_km"] + dist_delta), 1)
                 
                 # Speed micro-variance
                 speed_delta = random.uniform(-2.0, 2.0)
-                train["speed"] = max(25.0, min(130.0, train["speed"] + speed_delta))
+                train["speed"] = round(max(25.0, min(130.0, train["speed"] + speed_delta)), 1)
                 
                 # Delay status update
                 if train["current_delay_minutes"] <= 5:

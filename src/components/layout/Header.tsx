@@ -38,7 +38,7 @@ export default function Header({
     : [];
 
   return (
-    <header className="bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-30 px-6 sm:px-8 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-4">
+    <header className={`bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-20 px-6 sm:px-8 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-4 transition-all duration-200 ${roleMode === 'officer' ? 'lg:ml-64' : ''}`}>
       {/* Brand & Role Mode Switcher */}
       <div className="flex items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-3 cursor-pointer" onClick={onNavigateToPassengerHome}>
@@ -53,7 +53,7 @@ export default function Header({
               Smarter ETA. Better journeys.
             </p>
           </div>
-        </div>
+        )}
 
         {/* ROLE EXPERIENCE SWITCHER PILL */}
         <div className="bg-slate-900 border border-slate-800 p-1 rounded-2xl flex items-center shadow-inner">

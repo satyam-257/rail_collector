@@ -1,7 +1,13 @@
 # RailVue AI 🚆🤖
 
-> **Real-Time Dynamic ETA Prediction System for Indian Railways**  
-> *Smart India Hackathon (SIH) Solution*
+<p align="center">
+  <img src="public/railvue-logo.png" alt="RailVue AI Logo" width="160" />
+</p>
+
+<p align="center">
+  <strong>SMARTER ETA. BETTER JOURNEYS.</strong><br>
+  <em>Real-Time Dynamic ETA Prediction & Network Intelligence Platform for Indian Railways</em>
+</p>
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg)](https://fastapi.tiangolo.com/)

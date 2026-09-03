@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI):
     ticker_task = asyncio.create_task(live_simulation_ticker())
     print(f"[OK] Started RailVue AI Fleet Simulation Ticker ({len(train_registry.active_trains)} Active Trains)")
     yield
-    # Shutdown
+    print("[INFO] Shutting down background tasks...")
     ticker_task.cancel()
 
 app = FastAPI(

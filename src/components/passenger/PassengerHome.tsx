@@ -132,9 +132,16 @@ export default function PassengerHome({ onSelectTrain, onSearchBetween }: Passen
     <div className="max-w-4xl mx-auto space-y-8 py-4">
       {/* Hero Welcome Banner */}
       <div className="text-center space-y-3">
+        <div className="flex justify-center mb-1">
+          <img
+            src="/railvue-logo.png"
+            alt="RailVue AI Logo"
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-xl shadow-blue-500/10 border border-slate-200/80 bg-white p-1.5 object-contain"
+          />
+        </div>
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-          <span>Real-Time Railway Telemetry & Dynamic ETA Intelligence</span>
+          <span>RailVue AI — Real-Time Railway Telemetry & Dynamic ETA Intelligence</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-heading">
           Where is your train right now?

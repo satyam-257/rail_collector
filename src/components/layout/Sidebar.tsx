@@ -38,9 +38,11 @@ export default function Sidebar({ activePage, onPageChange, criticalAlertCount }
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800/80 flex flex-col gap-1.5 bg-slate-950">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 ring-1 ring-white/20">
-            <Cpu className="w-5.5 h-5.5 text-white" />
-          </div>
+          <img
+            src="/railvue-logo.png"
+            alt="RailVue AI Logo"
+            className="w-10 h-10 rounded-xl object-contain bg-white p-0.5 shadow-md shadow-cyan-500/20 ring-1 ring-white/20"
+          />
           <div>
             <h1 className="text-xl font-black tracking-tight flex items-center gap-1 text-white font-heading">
               RailVue <span className="text-cyan-400">AI</span>

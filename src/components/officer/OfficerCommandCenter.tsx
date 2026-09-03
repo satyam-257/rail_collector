@@ -182,7 +182,7 @@ export default function OfficerCommandCenter({
             Dual XGBoost + RF
           </p>
           <p className="text-xs text-slate-500">
-            MAE Error: 7.29 min | 15s interval ticker
+            MAE Error: 10.37 min | 15s interval ticker
           </p>
         </div>
       </div>

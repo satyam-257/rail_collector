@@ -432,8 +432,8 @@ export default function PassengerTrainTracker({
         currentSegment={currentSegment}
         currentSpeed={currentSpeed}
         currentDelay={currentDelay}
-        latitude={liveData?.latitude || 19.06}
-        longitude={liveData?.longitude || 73.01}
+        latitude={liveData?.latitude ?? (train as any)?.lat}
+        longitude={liveData?.longitude ?? (train as any)?.lng}
         distanceCoveredKm={distanceCoveredKm}
         totalDistanceKm={totalDistanceKm}
         journeyProgressPct={journeyProgressPct}

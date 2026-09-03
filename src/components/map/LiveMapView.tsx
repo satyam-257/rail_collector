@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Navigation, MapPin, RefreshCw, AlertCircle, Maximize2, Compass, Layers, Activity } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 import { StationStop } from '../../types';
+import { getStationCoordinate } from '../../data/stationCoordinates';
 
 interface LiveMapViewProps {
   trainNumber: string;
@@ -22,6 +23,18 @@ interface LiveMapViewProps {
   selectedStation?: StationStop | null;
   onSelectStation?: (station: StationStop) => void;
   geoCoordinates?: [number, number][]; // [lng, lat]
+}
+
+interface ResolvedWaypoint {
+  lat: number;
+  lng: number;
+  code: string;
+  name: string;
+  distanceKm: number;
+  isHalt: boolean;
+  isCurrent: boolean;
+  isOrigin: boolean;
+  isDestination: boolean;
 }
 
 export default function LiveMapView({
@@ -309,59 +322,67 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
   return (
     <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden relative">
       {/* Top Map Action Bar */}
-      <div className="bg-slate-950/80 backdrop-blur-md px-5 py-3 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2 text-white relative z-20">
-        <div className="flex items-center gap-2.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-heading">
-            Live Route Geometry & GPS Telemetry
-          </span>
+      <div className="bg-slate-950/85 backdrop-blur-md px-5 py-3.5 border-b border-slate-800 flex items-center justify-between flex-wrap gap-3 text-white relative z-20">
+        <div className="flex items-center gap-3">
+          <div className="relative flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-emerald-400" />
+            <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping absolute" />
+          </div>
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-heading block">
+              Live Route Geometry & GPS Telemetry
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium">
+              {originStation ? `${originStation.name} (${originStation.code})` : 'Origin'} → {destStation ? `${destStation.name} (${destStation.code})` : 'Destination'}
+            </span>
+          </div>
           {isDemo && (
             <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
-              DEMO / SIMULATION MODE
+              DEMO / SIMULATION
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
-          {/* Layer switchers */}
+        <div className="flex items-center gap-3 text-xs">
+          {/* Layer switcher */}
           <div className="flex items-center bg-slate-900 rounded-xl p-0.5 border border-slate-800">
             <button
               onClick={() => setActiveLayer('standard')}
-              className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition ${
-                activeLayer === 'standard' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`px-3 py-1 rounded-lg font-bold text-[11px] transition ${
+                activeLayer === 'standard' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
               Route Vector
             </button>
             <button
               onClick={() => setActiveLayer('congestion')}
-              className={`px-2.5 py-1 rounded-lg font-semibold text-[11px] transition ${
-                activeLayer === 'congestion' ? 'bg-amber-600 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`px-3 py-1 rounded-lg font-bold text-[11px] transition ${
+                activeLayer === 'congestion' ? 'bg-amber-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Congestion
+              Congestion Heat
             </button>
           </div>
 
-          <span className="text-[11px] text-slate-400 flex items-center gap-1 font-mono">
-            <RefreshCw className="w-3 h-3 text-slate-500" />
-            {lastUpdated || 'Just now'}
+          <span className="text-[11px] text-slate-400 flex items-center gap-1.5 font-mono bg-slate-950/60 px-2.5 py-1 rounded-lg border border-slate-800">
+            <RefreshCw className="w-3 h-3 text-cyan-400" />
+            {lastUpdated || 'Live Sync'}
           </span>
         </div>
       </div>
 
       {/* Main Interactive Map Canvas */}
-      <div className="relative w-full h-[380px] bg-slate-950 overflow-hidden select-none">
-        {/* Grid Background Effect */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
+      <div className="relative w-full h-[440px] bg-slate-950 overflow-hidden select-none">
+        {/* Subtle Railway Grid Texture */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-25 pointer-events-none" />
 
         {/* SVG Route Geometry Map */}
         <svg viewBox="0 0 800 420" className="w-full h-full relative z-10">
           <defs>
-            <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#10b981" />
-              <stop offset="50%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#8b5cf6" />
+              <stop offset="50%" stopColor="#06b6d4" />
+              <stop offset="100%" stopColor="#3b82f6" />
             </linearGradient>
             <linearGradient id="congestionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#10b981" />
@@ -369,7 +390,11 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
               <stop offset="100%" stopColor="#ef4444" />
             </linearGradient>
             <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+            <filter id="trainGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
             <filter id="trainGlow" x="-30%" y="-30%" width="160%" height="160%">
@@ -462,7 +487,7 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
                   >
                     {st.code}
                   </text>
-                )}
+                </g>
               </g>
             );
           })}
@@ -476,39 +501,68 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
             <text x="0" y="3.5" fill="#ffffff" fontSize="10" textAnchor="middle" fontWeight="bold">
               🚆
             </text>
+
+            {/* Live Speed Tooltip Floating on Train */}
+            <g transform="translate(0, -18)">
+              <rect
+                x={-28}
+                y={-12}
+                width={56}
+                height={16}
+                rx={6}
+                fill="#0284c7"
+                stroke="#ffffff"
+                strokeWidth="1"
+                className="shadow-lg"
+              />
+              <text
+                x={0}
+                y={-1}
+                fill="#ffffff"
+                fontSize="9"
+                fontWeight="bold"
+                textAnchor="middle"
+                className="font-mono"
+              >
+                {roundedSpeed > 0 ? `${roundedSpeed} km/h` : 'Stopped'}
+              </text>
+            </g>
           </g>
         </svg>
 
         {/* Floating Live Telemetry Overlay Card */}
-        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-80 bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-4 text-white shadow-2xl z-20 space-y-3">
+        <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-84 bg-slate-900/95 backdrop-blur-xl border border-slate-700/90 rounded-2xl p-4 text-white shadow-2xl z-20 space-y-3">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono">
-                LIVE TELEMETRY
+                LIVE GPS TELEMETRY
               </span>
             </div>
-            <span className="text-[11px] font-mono text-slate-400">
-              {currentSpeed > 0 ? `${Math.round(currentSpeed)} km/h` : 'Stopped'}
+            <span className="text-[11px] font-mono font-bold text-cyan-300 bg-slate-800 px-2 py-0.5 rounded">
+              {roundedSpeed > 0 ? `${roundedSpeed} km/h` : 'Station Halt'}
             </span>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Current Segment</p>
+          <div className="space-y-0.5">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Active Track Segment</p>
             <h4 className="text-xs font-bold text-slate-100 leading-snug">
               {currentSegment || currentLocation}
             </h4>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] font-mono border-t border-slate-800/80">
+          <div className="grid grid-cols-2 gap-2 pt-1.5 text-[11px] font-mono border-t border-slate-800/80">
             <div>
-              <span className="text-slate-400 block text-[10px]">JOURNEY PROGRESS</span>
-              <strong className="text-blue-400 font-bold">{journeyProgressPct}%</strong> ({Math.round(distanceCoveredKm)}/{Math.round(totalDistanceKm)} km)
+              <span className="text-slate-400 block text-[10px]">PROGRESS</span>
+              <strong className="text-blue-400 font-bold">{roundedProgress}%</strong> ({roundedCovered}/{roundedTotal} km)
             </div>
             <div>
-              <span className="text-slate-400 block text-[10px]">CURRENT DELAY</span>
+              <span className="text-slate-400 block text-[10px]">DELAY STATUS</span>
               <strong className={`font-bold ${isDelayed ? 'text-amber-400' : 'text-emerald-400'}`}>
-                {isDelayed ? `+${currentDelay} min` : 'On Time'}
+                {isDelayed ? `+${roundedDelay} min` : 'On Time'}
               </strong>
             </div>
           </div>
