@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Train, PassengerDelayExplanation, StationStop } from '../../types';
 import { mockTrainService } from '../../services/mockTrainService';
+import { INITIAL_TRAINS } from '../../data/mockData';
 import LiveMapView from '../map/LiveMapView';
 import RailRadarTimeline from '../timeline/RailRadarTimeline';
 
@@ -53,10 +54,55 @@ export default function PassengerTrainTracker({
 
   const trainNumber = train?.number || train?.id || '12301';
 
-  // Real Multi-Endpoint Backend Data Fetching
+  // Real Multi-Endpoint Backend Data Fetching with seamless static/Vercel fallback
   const loadAllTrainData = React.useCallback(async () => {
     setIsLoading(true);
     setFetchError(null);
+
+    const fallbackTrain = train || INITIAL_TRAINS.find(t => t.number === trainNumber || t.id === trainNumber) || INITIAL_TRAINS[0];
+    const buildFallbackData = () => {
+      const fallbackStations = (fallbackTrain?.timeline && fallbackTrain.timeline.length > 0)
+        ? fallbackTrain.timeline.map((s, idx) => ({
+            stationCode: s.stationCode,
+            stationName: s.stationName,
+            sequence: idx + 1,
+            scheduledArrival: s.scheduledArrival,
+            scheduledDeparture: s.scheduledDeparture,
+            actualArrival: s.predictedArrival || s.scheduledArrival,
+            actualDeparture: s.predictedDeparture || s.scheduledDeparture,
+            predictedArrival: s.predictedArrival || s.scheduledArrival,
+            predictedDeparture: s.predictedDeparture || s.scheduledDeparture,
+            delayMinutes: s.delayMinutes || 0,
+            distanceKm: s.distanceFromOrigin,
+            status: s.status,
+            platform: s.platform,
+            isHalt: s.isHalt !== false
+          }))
+        : [];
+
+      return {
+        train_number: trainNumber,
+        train_name: fallbackTrain?.name || `Train ${trainNumber}`,
+        running_status: 'RUNNING',
+        current_location: fallbackTrain?.currentLocation || 'In Transit',
+        current_segment: `${fallbackTrain?.origin || 'Origin'} → ${fallbackTrain?.destination || 'Destination'}`,
+        previous_station: fallbackTrain?.origin || 'Origin',
+        next_station: fallbackTrain?.nextStation || fallbackTrain?.destination || 'Destination',
+        source_station_name: fallbackTrain?.origin || 'Origin',
+        source_station_code: fallbackTrain?.originCode || 'ORG',
+        destination_station_name: fallbackTrain?.destination || 'Destination',
+        destination_station_code: fallbackTrain?.destinationCode || 'DEST',
+        current_delay_minutes: fallbackTrain?.delayMinutes ?? 4,
+        current_speed_kmph: fallbackTrain?.currentSpeed ?? 88,
+        distance_covered_km: fallbackTrain?.distanceCovered ?? 180,
+        total_distance_km: fallbackTrain?.totalDistance ?? 750,
+        journey_progress_pct: fallbackTrain?.totalDistance ? Math.round(((fallbackTrain.distanceCovered || 180) / fallbackTrain.totalDistance) * 100) : 35,
+        predicted_destination_eta: fallbackTrain?.aiPredictedEta || '14:03',
+        confidence_percentage: fallbackTrain?.confidenceScore || 95,
+        stations: fallbackStations,
+        last_updated: new Date().toLocaleTimeString() + ' IST'
+      };
+    };
 
     try {
       const [liveRes, schedRes, routeRes, expRes] = await Promise.all([
@@ -66,23 +112,27 @@ export default function PassengerTrainTracker({
         mockTrainService.getPassengerEtaExplanation(trainNumber, journeyDate)
       ]);
 
-      if (!liveRes) {
-        throw new Error(`Unable to fetch live telemetry for Train ${trainNumber} on ${journeyDate}.`);
+      if (liveRes) {
+        setLiveData(liveRes);
+        setScheduleData(schedRes);
+        setRouteGeoData(routeRes);
+        setExplanation(expRes);
+        setLastUpdatedTime(liveRes?.last_updated || new Date().toLocaleTimeString());
+      } else {
+        // Fall back gracefully to curated train simulation telemetry (e.g. for Vercel static demo or offline mode)
+        setLiveData(buildFallbackData());
+        setIsDemoMode(true);
+        setLastUpdatedTime(new Date().toLocaleTimeString() + ' IST');
       }
-
-      setLiveData(liveRes);
-      setScheduleData(schedRes);
-      setRouteGeoData(routeRes);
-      setExplanation(expRes);
-      setLastUpdatedTime(liveRes?.last_updated || new Date().toLocaleTimeString());
     } catch (err: any) {
-      console.error('[PassengerTrainTracker] Failed to load train data:', err);
-      setFetchError(err.message || `Unable to fetch live data for this train (${trainNumber}).`);
-      setLiveData(null);
+      console.warn('[PassengerTrainTracker] Backend unreachable, activating simulated telemetry:', err);
+      setLiveData(buildFallbackData());
+      setIsDemoMode(true);
+      setLastUpdatedTime(new Date().toLocaleTimeString() + ' IST');
     } finally {
       setIsLoading(false);
     }
-  }, [trainNumber, journeyDate]);
+  }, [trainNumber, journeyDate, train]);
 
   useEffect(() => {
     loadAllTrainData();
