@@ -51,7 +51,7 @@ export default function PassengerTrainTracker({
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>('');
 
-  const trainNumber = train.number || train.id;
+  const trainNumber = train?.number || train?.id || '12301';
 
   // Real Multi-Endpoint Backend Data Fetching
   const loadAllTrainData = React.useCallback(async () => {
@@ -145,17 +145,17 @@ export default function PassengerTrainTracker({
   }, [isDemoMode, trainNumber, train, liveData]);
 
   // Normalized Live Data Fields
-  const trainName = liveData?.train_name || train.name || `Train ${trainNumber}`;
-  const sourceStationName = liveData?.source_station_name || train.origin || 'Origin';
-  const sourceStationCode = liveData?.source_station_code || train.originCode || 'ORG';
-  const destinationStationName = liveData?.destination_station_name || train.destination || 'Destination';
-  const destinationStationCode = liveData?.destination_station_code || train.destinationCode || 'DEST';
+  const trainName = liveData?.train_name || train?.name || `Train ${trainNumber}`;
+  const sourceStationName = liveData?.source_station_name || train?.origin || 'Origin';
+  const sourceStationCode = liveData?.source_station_code || train?.originCode || 'ORG';
+  const destinationStationName = liveData?.destination_station_name || train?.destination || 'Destination';
+  const destinationStationCode = liveData?.destination_station_code || train?.destinationCode || 'DEST';
 
   const runningStatus = isDemoMode ? 'SIMULATED RUNNING' : (liveData?.running_status || 'RUNNING');
-  const currentDelay = Math.round(liveData?.current_delay_minutes ?? train.delayMinutes ?? 0);
-  const currentSpeed = Math.round(liveData?.current_speed_kmph ?? train.currentSpeed ?? 0);
-  const distanceCoveredKm = Math.round(liveData?.distance_covered_km ?? train.distanceCovered ?? 0);
-  const totalDistanceKm = Math.round(liveData?.total_distance_km ?? train.totalDistance ?? 0);
+  const currentDelay = Math.round(liveData?.current_delay_minutes ?? train?.delayMinutes ?? 0);
+  const currentSpeed = Math.round(liveData?.current_speed_kmph ?? train?.currentSpeed ?? 0);
+  const distanceCoveredKm = Math.round(liveData?.distance_covered_km ?? train?.distanceCovered ?? 0);
+  const totalDistanceKm = Math.round(liveData?.total_distance_km ?? train?.totalDistance ?? 0);
   const distanceRemainingKm = Math.max(0, totalDistanceKm - distanceCoveredKm);
   const journeyProgressPct = Math.round(liveData?.journey_progress_pct ?? (totalDistanceKm > 0 ? (distanceCoveredKm / totalDistanceKm) * 100 : 0));
 
@@ -164,7 +164,7 @@ export default function PassengerTrainTracker({
   const previousStation = liveData?.previous_station || sourceStationName;
   const nextStation = liveData?.next_station || destinationStationName;
 
-  const predictedDestinationEta = liveData?.predicted_destination_eta || train.aiPredictedEta || '--:--';
+  const predictedDestinationEta = liveData?.predicted_destination_eta || train?.aiPredictedEta || '--:--';
   const confidencePercentage = liveData?.confidence_percentage || 94;
   const isDelayed = currentDelay > 5;
 
@@ -188,7 +188,7 @@ export default function PassengerTrainTracker({
         platform: s.platform || `PF ${(idx % 3) + 1}`,
         isHalt: s.isHalt !== false
       }))
-    : (train.timeline && train.timeline.length > 0 ? train.timeline : []);
+    : (train?.timeline && train.timeline.length > 0 ? train.timeline : []);
 
   const totalHalts = liveData?.total_halts || rawStations.filter(s => s.isHalt !== false).length || rawStations.length;
 

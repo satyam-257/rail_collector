@@ -41,17 +41,21 @@ export default function Header({
     <header className={`bg-slate-950/95 backdrop-blur-md border-b border-slate-800 sticky top-0 z-20 px-6 sm:px-8 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-4 transition-all duration-200 ${roleMode === 'officer' ? 'lg:ml-64' : ''}`}>
       {/* Brand & Role Mode Switcher */}
       <div className="flex items-center gap-4 sm:gap-6">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={onNavigateToPassengerHome}>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/25 ring-1 ring-white/20">
-            <TrainIcon className="w-5.5 h-5.5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-lg font-black text-white tracking-tight font-heading flex items-center gap-1.5">
-              RailVue <span className="text-cyan-400">AI</span>
-            </h1>
-            <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
-              Smarter ETA. Better journeys.
-            </p>
+        {roleMode === 'passenger' && (
+          <div className="flex items-center gap-3 cursor-pointer" onClick={onNavigateToPassengerHome}>
+            <img
+              src="/railvue-logo.png"
+              alt="RailVue AI Logo"
+              className="w-10 h-10 rounded-xl object-contain bg-white p-0.5 shadow-md shadow-cyan-500/25 ring-1 ring-white/20"
+            />
+            <div>
+              <h1 className="text-lg font-black text-white tracking-tight font-heading flex items-center gap-1.5">
+                RailVue <span className="text-cyan-400">AI</span>
+              </h1>
+              <p className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">
+                Smarter ETA. Better journeys.
+              </p>
+            </div>
           </div>
         )}
 

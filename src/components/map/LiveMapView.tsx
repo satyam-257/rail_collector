@@ -61,6 +61,12 @@ export default function LiveMapView({
   const [mapZoom, setMapZoom] = useState(1);
   const [activeLayer, setActiveLayer] = useState<'standard' | 'satellite' | 'congestion'>('standard');
 
+  const roundedSpeed = Math.round(currentSpeed || 0);
+  const roundedDelay = Math.round(currentDelay || 0);
+  const roundedCovered = Math.round(distanceCoveredKm || 0);
+  const roundedTotal = Math.round(totalDistanceKm || 1);
+  const roundedProgress = Math.min(100, Math.max(0, Math.round(journeyProgressPct || (roundedTotal > 0 ? (roundedCovered / roundedTotal) * 100 : 0))));
+
 // Major Indian Railways station coordinates dictionary for accurate route plotting
 const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
   // [latitude, longitude]
@@ -319,6 +325,9 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
   traveledPoints.push(`${trainX.toFixed(1)},${trainY.toFixed(1)}`);
   const traveledPathD = traveledPoints.length > 1 ? `M ${traveledPoints.join(' L ')}` : '';
 
+  const originStation = waypoints[0];
+  const destStation = waypoints[waypoints.length - 1];
+
   return (
     <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-2xl overflow-hidden relative">
       {/* Top Map Action Bar */}
@@ -487,7 +496,7 @@ const MAJOR_STATION_COORDS: Record<string, [number, number]> = {
                   >
                     {st.code}
                   </text>
-                </g>
+                )}
               </g>
             );
           })}

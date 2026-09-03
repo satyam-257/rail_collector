@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Passenger Experience Components
 import PassengerHome from './components/passenger/PassengerHome';
@@ -85,29 +86,31 @@ export default function App() {
       {roleMode === 'passenger' ? (
         /* PASSENGER EXPERIENCE CONTAINER */
         <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-          {passengerView === 'home' && (
-            <PassengerHome
-              onSelectTrain={handleSelectTrainFromPassenger}
-              onSearchBetween={handleSearchBetweenFromPassenger}
-            />
-          )}
+          <ErrorBoundary onReset={() => setPassengerView('home')} fallbackTitle="Unable to display train tracker">
+            {passengerView === 'home' && (
+              <PassengerHome
+                onSelectTrain={handleSelectTrainFromPassenger}
+                onSearchBetween={handleSearchBetweenFromPassenger}
+              />
+            )}
 
-          {passengerView === 'tracker' && (
-            <PassengerTrainTracker
-              train={selectedTrain}
-              onBackToSearch={() => setPassengerView('home')}
-              onSelectTrain={handleSelectTrainFromPassenger}
-            />
-          )}
+            {passengerView === 'tracker' && (
+              <PassengerTrainTracker
+                train={selectedTrain}
+                onBackToSearch={() => setPassengerView('home')}
+                onSelectTrain={handleSelectTrainFromPassenger}
+              />
+            )}
 
-          {passengerView === 'between' && (
-            <BetweenTrainsResults
-              fromCode={betweenSearchStations.from}
-              toCode={betweenSearchStations.to}
-              onSelectTrain={handleSelectTrainFromPassenger}
-              onBackToSearch={() => setPassengerView('home')}
-            />
-          )}
+            {passengerView === 'between' && (
+              <BetweenTrainsResults
+                fromCode={betweenSearchStations.from}
+                toCode={betweenSearchStations.to}
+                onSelectTrain={handleSelectTrainFromPassenger}
+                onBackToSearch={() => setPassengerView('home')}
+              />
+            )}
+          </ErrorBoundary>
         </main>
       ) : (
         /* OFFICER NETWORK COMMAND CENTER CONTAINER (WITH SIDEBAR) */

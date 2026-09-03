@@ -151,16 +151,6 @@ export default function RailRadarTimeline({
 
       {/* RAILWAY TRACK TIMELINE CONTAINER */}
       <div className="space-y-0.5 relative">
-        {/* Railway Ladder Track Graphic (Centered) */}
-        <div className="absolute left-[34%] sm:left-[38%] top-4 bottom-4 w-6 flex flex-col items-center justify-between pointer-events-none z-0">
-          <div className="w-3 h-full border-x-2 border-slate-700/80 relative flex flex-col justify-around">
-            {/* Ladder rungs */}
-            {Array.from({ length: 40 }).map((_, i) => (
-              <div key={i} className="w-full h-[1.5px] bg-slate-700/70" />
-            ))}
-          </div>
-        </div>
-
         {visibleStations.map((st, idx) => {
           const isCompleted = st.status === 'DEPARTED' || st.status === 'PASSED' || st.status === 'completed';
           const isCurrent = st.status === 'AT_STATION' || st.status === 'current' || st.stationCode === currentStationCode;
@@ -213,16 +203,28 @@ export default function RailRadarTimeline({
                 </div>
 
                 {/* 2. CENTER COLUMN: RAILWAY TRACK & STATION INFO */}
-                <div className="flex-1 flex items-center gap-2 sm:gap-3.5 z-20">
-                  {/* Yellow Node Dot on Railway Track */}
-                  <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 transition-transform ${
-                    isCurrent
-                      ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/30 scale-125 shadow-lg animate-pulse'
-                      : isCompleted
-                      ? 'bg-amber-400 text-slate-950 shadow-sm'
-                      : 'bg-amber-400/80 text-slate-950'
-                  }`}>
-                    {isCurrent ? '🚆' : (isCompleted ? '✓' : '●')}
+                <div className="flex-1 flex items-center gap-3 sm:gap-4 z-20">
+                  {/* Track Node Column with continuous track connector */}
+                  <div className="relative flex flex-col items-center justify-center shrink-0 w-6 h-12">
+                    {/* Upper track segment connecting from previous stop */}
+                    {idx > 0 && (
+                      <div className={`absolute top-0 bottom-1/2 w-0.5 z-0 ${isCompleted || isCurrent ? 'bg-amber-400' : 'bg-slate-700'}`} />
+                    )}
+                    {/* Lower track segment connecting to next stop */}
+                    {idx < visibleStations.length - 1 && (
+                      <div className={`absolute top-1/2 bottom-0 w-0.5 z-0 ${isCompleted ? 'bg-amber-400' : 'bg-slate-700'}`} />
+                    )}
+
+                    {/* Node Circle on Track */}
+                    <div className={`relative z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 transition-transform ${
+                      isCurrent
+                        ? 'bg-amber-400 text-slate-950 ring-4 ring-amber-400/30 scale-125 shadow-lg animate-pulse'
+                        : isCompleted
+                        ? 'bg-amber-400 text-slate-950 shadow-sm'
+                        : 'bg-amber-400/80 text-slate-950'
+                    }`}>
+                      {isCurrent ? '🚆' : (isCompleted ? '✓' : '●')}
+                    </div>
                   </div>
 
                   {/* Station Name & Badges */}
